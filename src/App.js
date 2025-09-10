@@ -235,30 +235,31 @@ function App() {
                 className="filter-select"
               >
                 <option value="">지역</option><option value="건입동">건입동</option>
-                <option value="구좌읍">구좌읍</option>
-                <option value="노형동">노형동</option>
-                <option value="도두동">도두동</option>
-                <option value="봉개동">봉개동</option>
-                <option value="삼도1동">삼도1동</option>
-                <option value="삼도2동">삼도2동</option>
-                <option value="삼양동">삼양동</option>
-                <option value="아라동">아라동</option>
-                <option value="애월읍">애월읍</option>
-                <option value="연동">연동</option>
-                <option value="오라동">오라동</option>
-                <option value="외도동">외도동</option>
-                <option value="용담1동">용담1동</option>
-                <option value="용담2동">용담2동</option>
-                <option value="이도1동">이도1동</option>
-                <option value="이도2동">이도2동</option>
-                <option value="이호동">이호동</option>
-                <option value="일도1동">일도1동</option>
-                <option value="일도2동">일도2동</option>
-                <option value="조천읍">조천읍</option>
-                <option value="추자면">추자면</option>
-                <option value="한림읍">한림읍</option>
-                <option value="화북동">화북동</option>
-                <option value="한경면">한경면</option>
+<option value="101">건입동</option>
+<option value="102">구좌읍</option>
+<option value="103">노형동</option>
+<option value="104">도두동</option>
+<option value="105">봉개동</option>
+<option value="106">삼도1동</option>
+<option value="107">삼도2동</option>
+<option value="108">삼양동</option>
+<option value="109">아라동</option>
+<option value="110">애월읍</option>
+<option value="111">연동</option>
+<option value="112">오라동</option>
+<option value="113">외도동</option>
+<option value="114">용담1동</option>
+<option value="115">용담2동</option>
+<option value="116">이도1동</option>
+<option value="117">이도2동</option>
+<option value="118">이호동</option>
+<option value="119">일도1동</option>
+<option value="120">일도2동</option>
+<option value="121">조천읍</option>
+<option value="122">추자면</option>
+<option value="123">한림읍</option>
+<option value="124">화북동</option>
+<option value="125">한경면</option>
               </select>
 
               <select
@@ -267,24 +268,26 @@ function App() {
                 className="filter-select"
               >
                 <option value="">업종</option>
-               <option value="한식">한식</option>
-                <option value="중식">중식</option>
-                <option value="일식">일식</option>
-                <option value="양식">양식</option>
-                <option value="분식">분식</option>
-                <option value="제과">제과</option>
-                <option value="카페">카페</option>
-                <option value="음식점업">음식점업</option>
-                <option value="기타요식업">기타요식업</option>
-                <option value="세탁업">세탁업</option>
-                <option value="기타서비스">기타서비스</option>
-                <option value="숙박">숙박</option>
-                <option value="숙박업">숙박업</option>
-                <option value="기타">기타</option>
-                <option value="미용">미용</option>
-                <option value="이미용업">이미용업</option>
-                <option value="기타비요">기타비요</option>
-                <option value="기타비요식">기타비요식</option>
+    <option value="11">한식</option>
+    <option value="12">중식</option>
+    <option value="13">일식</option>
+    <option value="14">양식</option>
+    <option value="15">분식</option>
+    <option value="16">제과</option>
+    <option value="17">카페</option>
+    <option value="18">음식점업</option>
+    <option value="19">기타요식업</option>
+    <option value="20">세탁업</option>
+    <option value="21">기타서비스</option>
+    <option value="22">숙박</option>
+    <option value="23">숙박업</option>
+    <option value="24">기타</option>
+    <option value="25">미용</option>
+    <option value="26">미용업</option>
+    <option value="27">이미용업</option>
+    <option value="28">기타비요</option>
+    <option value="29">기타비요식</option>
+
               </select>
 
               <select
@@ -292,8 +295,12 @@ function App() {
                 onChange={(e) => handleFilterChange("location", e.target.value)}
                 className="filter-select"
               >
-                <option value="">다른 지역</option>
-                <option value="내용없음">내용없음</option>
+                <option value="">가격</option>
+                <option value="1만원 이하">~1만원 이하</option>
+                <option value="2만원 이하">~2만원 이하</option>
+                <option value="3만원 이하">~3만원 이하</option>
+                <option value="4만원 이하">~4만원 이하</option>
+                <option value="5만원 이하">~5만원 이하</option>
               </select>
             </div>
           </div>
@@ -367,7 +374,7 @@ function App() {
               <p className="map-subtitle">업소 위치가 여기에 표시됩니다</p>
               {selectedRestaurant && (
                 <div className="selected-info">
-                  <p><strong>선택된 맛집:</strong> {selectedRestaurant.name}</p>
+                  <p><strong>선택된 업소:</strong> {selectedRestaurant.name}</p>
                   <p>{selectedRestaurant.address}</p>
                 </div>
               )}
