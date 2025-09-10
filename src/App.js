@@ -81,6 +81,71 @@ const sampleRestaurants = [
     image: "https://images.unsplash.com/photo-1671522636199-3af72349c2e5?w=300&h=200&fit=crop",
     coordinates: [33.5126, 126.5219],
     address: "제주시 조천읍 올레길 258-36"
+  },
+  {
+    id: 7,
+    name: "중식당 홍콩반점",
+    description: "중식 전문점",
+    category: "해산물",
+    priceRange: "보통",
+    location: "제주시",
+    rating: 4.1,
+    price: "12,000원",
+    image: "https://images.unsplash.com/photo-1600891964599-f61ba0e24092?w=300&h=200&fit=crop",
+    coordinates: [33.5010, 126.5310],
+    address: "제주시 연동 11-22"
+  },
+  {
+    id: 8,
+    name: "스시 도쿄",
+    description: "신선한 초밥과 일식 요리",
+    category: "고기구이",
+    priceRange: "비쌈",
+    location: "서귀포시",
+    rating: 4.5,
+    price: "30,000원",
+    image: "https://images.unsplash.com/photo-1603078379273-8c6b5f29df6c?w=300&h=200&fit=crop",
+    coordinates: [33.2550, 126.5600],
+    address: "서귀포시 대천동 33-45"
+  },
+  {
+    id: 9,
+    name: "양식 레스토랑",
+    description: "서양식 요리 전문점",
+    category: "카페",
+    priceRange: "비쌈",
+    location: "제주시",
+    rating: 4.3,
+    price: "28,000원",
+    image: "https://images.unsplash.com/photo-1598514982442-6eb9a2b773e0?w=300&h=200&fit=crop",
+    coordinates: [33.5100, 126.5200],
+    address: "제주시 한경면 55-66"
+  },
+  {
+    id: 10,
+    name: "분식 천국",
+    description: "분식 전문점",
+    category: "제과점",
+    priceRange: "저렴함",
+    location: "제주시",
+    rating: 4.0,
+    price: "4,500원",
+    image: "https://images.unsplash.com/photo-1617196032583-5fc3c98c2f16?w=300&h=200&fit=crop",
+    coordinates: [33.5200, 126.5300],
+    address: "제주시 조천읍 123-45"
+  },
+  {
+    id: 11,
+    name: "미용실 헤어스타",
+    description: "미용실",
+    category: "이미용업",
+    priceRange: "보통",
+    location: "제주시",
+    rating: 4.2,
+    price: "20,000원",
+    image: "https://images.unsplash.com/photo-1588776814546-dbd7d0d2a3be?w=300&h=200&fit=crop",
+    coordinates: [33.5000, 126.5250],
+    address: "제주시 연동 10-11"
   }
 ];
 
@@ -95,7 +160,6 @@ function App() {
     location: ""
   });
 
-  // Filter restaurants based on search criteria
   useEffect(() => {
     let filtered = restaurants;
 
@@ -144,13 +208,11 @@ function App() {
   return (
     <div className="app">
       <div className="main-container">
-        {/* Left Panel */}
         <div className="left-panel">
-          {/* Header and Search */}
           <div className="search-section">
             <div className="title-section">
-              <h1 className="main-title">제주도 혼자 옵서예~</h1>
-              <p className="subtitle">제주도에 있는 착한 음식점을 간편히 찾아보세요.</p>
+              <h1 className="main-title">제주시 혼자 옵서예~</h1>
+              <p className="subtitle">제주시에 있는 착한 업소을 간편히 찾아보세요.</p>
             </div>
 
             <div className="search-bar">
@@ -158,7 +220,7 @@ function App() {
                 <Search className="search-icon" size={20} />
                 <input
                   type="text"
-                  placeholder="맛집 이름 혹은 음식을 입력해주세요"
+                  placeholder="찾으시는 업소를 입력해주세요"
                   value={filters.search}
                   onChange={(e) => handleFilterChange("search", e.target.value)}
                   className="search-input"
@@ -172,14 +234,31 @@ function App() {
                 onChange={(e) => handleFilterChange("category", e.target.value)}
                 className="filter-select"
               >
-                <option value="">모든 음식 종류</option>
-                <option value="한식">한식</option>
-                <option value="해산물">해산물</option>
-                <option value="고기구이">고기구이</option>
-                <option value="카페">카페</option>
-                <option value="제과점">제과점</option>
-                <option value="퓨전">퓨전</option>
-                <option value="전통음식">전통음식</option>
+                <option value="">지역</option><option value="건입동">건입동</option>
+                <option value="구좌읍">구좌읍</option>
+                <option value="노형동">노형동</option>
+                <option value="도두동">도두동</option>
+                <option value="봉개동">봉개동</option>
+                <option value="삼도1동">삼도1동</option>
+                <option value="삼도2동">삼도2동</option>
+                <option value="삼양동">삼양동</option>
+                <option value="아라동">아라동</option>
+                <option value="애월읍">애월읍</option>
+                <option value="연동">연동</option>
+                <option value="오라동">오라동</option>
+                <option value="외도동">외도동</option>
+                <option value="용담1동">용담1동</option>
+                <option value="용담2동">용담2동</option>
+                <option value="이도1동">이도1동</option>
+                <option value="이도2동">이도2동</option>
+                <option value="이호동">이호동</option>
+                <option value="일도1동">일도1동</option>
+                <option value="일도2동">일도2동</option>
+                <option value="조천읍">조천읍</option>
+                <option value="추자면">추자면</option>
+                <option value="한림읍">한림읍</option>
+                <option value="화북동">화북동</option>
+                <option value="한경면">한경면</option>
               </select>
 
               <select
@@ -187,10 +266,25 @@ function App() {
                 onChange={(e) => handleFilterChange("priceRange", e.target.value)}
                 className="filter-select"
               >
-                <option value="">모든 가격대</option>
-                <option value="저렴함">저렴함</option>
-                <option value="보통">보통</option>
-                <option value="비쌈">비쌈</option>
+                <option value="">업종</option>
+               <option value="한식">한식</option>
+                <option value="중식">중식</option>
+                <option value="일식">일식</option>
+                <option value="양식">양식</option>
+                <option value="분식">분식</option>
+                <option value="제과">제과</option>
+                <option value="카페">카페</option>
+                <option value="음식점업">음식점업</option>
+                <option value="기타요식업">기타요식업</option>
+                <option value="세탁업">세탁업</option>
+                <option value="기타서비스">기타서비스</option>
+                <option value="숙박">숙박</option>
+                <option value="숙박업">숙박업</option>
+                <option value="기타">기타</option>
+                <option value="미용">미용</option>
+                <option value="이미용업">이미용업</option>
+                <option value="기타비요">기타비요</option>
+                <option value="기타비요식">기타비요식</option>
               </select>
 
               <select
@@ -198,17 +292,12 @@ function App() {
                 onChange={(e) => handleFilterChange("location", e.target.value)}
                 className="filter-select"
               >
-                <option value="">모든 지역</option>
-                <option value="제주시">제주시</option>
-                <option value="서귀포시">서귀포시</option>
-                <option value="한림">한림</option>
-                <option value="성산">성산</option>
-                <option value="중문">중문</option>
+                <option value="">다른 지역</option>
+                <option value="내용없음">내용없음</option>
               </select>
             </div>
           </div>
           
-          {/* Results List */}
           <div className="results-section">
             <div className="list-header">
               <h2 className="list-title">검색 결과 ({filteredRestaurants.length}개)</h2>
@@ -271,12 +360,11 @@ function App() {
           </div>
         </div>
 
-        {/* Right Panel - Map */}
         <div className="right-panel">
           <div className="map-container">
             <div className="map-placeholder">
               <h2 className="map-title">지도</h2>
-              <p className="map-subtitle">맛집 위치가 여기에 표시됩니다</p>
+              <p className="map-subtitle">업소 위치가 여기에 표시됩니다</p>
               {selectedRestaurant && (
                 <div className="selected-info">
                   <p><strong>선택된 맛집:</strong> {selectedRestaurant.name}</p>
