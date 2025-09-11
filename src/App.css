@@ -410,66 +410,94 @@ body {
   background: #a8a8a8;
 }
 
-/* Responsive Design */
-@media (max-width: 1024px) {
-  .left-panel {
-    width: 40%;
-  }
-  
-  .right-panel {
-    width: 60%;
-  }
-  
-  .main-title {
-    font-size: 1.8rem;
-  }
+/* === AI 채팅 대화 스타일 (최종) === */
+.chat-container {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 16px;
+  max-height: calc(100vh - 220px);
+  overflow-y: auto;
+  scroll-behavior: smooth;
 }
 
-@media (max-width: 768px) {
-  .main-container {
-    flex-direction: column;
-  }
-  
-  .left-panel, .right-panel {
-    width: 100%;
-  }
-  
-  .left-panel {
-    height: 60vh;
-  }
-  
-  .right-panel {
-    height: 40vh;
-  }
-  
-  .main-title {
-    font-size: 1.6rem;
-  }
-  
-  .filters-container {
-    grid-template-columns: 1fr;
-    gap: 10px;
-  }
-  
-  .restaurant-card {
-    padding: 16px 20px;
-  }
-  
-  .card-image {
-    width: 70px;
-    height: 70px;
-    margin-right: 12px;
-  }
-  
-  .search-section {
-    padding: 20px;
-  }
-  
-  .map-title {
-    font-size: 2rem;
-  }
-  
-  .map-subtitle {
-    font-size: 1rem;
-  }
+.chat-message {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-width: 90%;
+}
+
+.message-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.85rem;
+  color: #6b7280;
+  font-weight: 500;
+}
+
+.ai-icon {
+  width: 24px;
+  height: 24px;
+  border-radius: 8px;
+  background: #0ea5e9;
+  color: white;
+  font-size: 0.85rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.user-icon {
+  width: 24px;
+  height: 24px;
+  border-radius: 8px;
+  background: #6366f1;
+  color: white;
+  font-size: 0.85rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.message-content {
+  padding: 12px 16px;
+  border-radius: 16px;
+  line-height: 1.6;
+  font-size: 0.95rem;
+  word-wrap: break-word;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.ai-message {
+  background: #3b82f6; /* 진한 파란색 → 눈에 확 띄게 */
+  color: white;        /* 흰 글자 → 최고 대비 */
+  align-self: flex-start;
+  border-bottom-left-radius: 8px;
+}
+
+.user-message {
+  background: #6366f1; /* 파란색 강조 */
+  color: white;
+  align-self: flex-end;
+  border-bottom-right-radius: 8px;
+  box-shadow: 0 2px 6px rgba(99, 102, 241, 0.3);
+}
+
+/* 타이핑 효과 (옵션) */
+.typing-effect::after {
+  content: ' ';
+  display: inline-block;
+  width: 8px;
+  height: 1em;
+  background: #0ea5e9;
+  animation: blink 1.4s infinite both;
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
 }
