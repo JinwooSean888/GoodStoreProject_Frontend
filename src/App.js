@@ -1,9 +1,8 @@
 import React, { useState, useEffect, useRef } from "react";
 import "./App.css";
-import { Search } from "lucide-react";
+import { Search, Map, List, Maximize2, Minimize2, Filter, Star, MapPin, Phone, Navigation, Clock } from "lucide-react";
 import axios from "axios";
 
-// 🚫 샘플 데이터 제거됨 - 실제 데이터는 API에서 가져오기
 const sampleRestaurants = [];
 
 function App() {
@@ -11,11 +10,17 @@ function App() {
   const [filteredRestaurants, setFilteredRestaurants] = useState(sampleRestaurants);
   const [selectedRestaurant, setSelectedRestaurant] = useState(null);
   const [filters, setFilters] = useState({ search: "", category: "", location: "" });
-  const [history, setHistory] = useState([]); // AI 질문-답변 히스토리
-  const [inputText, setInputText] = useState(""); // AI 질문 입력창
+  const [history, setHistory] = useState([]);
+  const [inputText, setInputText] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  
+  // 새로운 UI 상태들
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [viewMode, setViewMode] = useState("balanced"); // "map-focused", "balanced", "list-focused"
+  const [activeFilters, setActiveFilters] = useState([]);
+  const [sortBy, setSortBy] = useState("distance");
 
-  const chatContainerRef = useRef(null); // 스크롤 제어용
+  const chatContainerRef = useRef(null);
 
   const categoryOptions = [
     { value: "11", label: "한식" }, { value: "12", label: "중식" },
@@ -44,6 +49,14 @@ function App() {
     { value: "121", label: "조천읍" }, { value: "122", label: "추자면" },
     { value: "123", label: "한림읍" }, { value: "124", label: "화북동" },
     { value: "125", label: "한경면" },
+  ];
+
+  // 퀵 필터 옵션들
+  const quickFilters = [
+    { id: "open", label: "영업중", color: "#10b981" },
+    { id: "nearby", label: "가까운곳", color: "#3b82f6" },
+    { id: "cheap", label: "저렴한", color: "#f59e0b" },
+    { id: "rating", label: "평점높은", color: "#8b5cf6" }
   ];
 
   // 레스토랑 필터 적용
@@ -76,16 +89,40 @@ function App() {
 
   const handleRestaurantSelect = (restaurant) => setSelectedRestaurant(restaurant);
 
-  const getPriceRangeColor = (priceRange) => {
-    switch (priceRange) {
-      case "저렴함": return "price-tag-green";
-      case "보통": return "price-tag-yellow";
-      case "비쌈": return "price-tag-red";
-      default: return "price-tag-gray";
+  // 퀵 필터 토글
+  const toggleQuickFilter = (filterId) => {
+    setActiveFilters(prev => 
+      prev.includes(filterId) 
+        ? prev.filter(id => id !== filterId)
+        : [...prev, filterId]
+    );
+  };
+
+  // 전체 필터 해제
+  const clearAllFilters = () => {
+    setActiveFilters([]);
+  };
+
+  // 뷰 모드에 따른 높이 계산
+  const getViewHeights = () => {
+    switch (viewMode) {
+      case "map-focused":
+        return { mapHeight: "75%", listHeight: "25%" };
+      case "list-focused":
+        return { mapHeight: "25%", listHeight: "75%" };
+      default:
+        return { mapHeight: "40%", listHeight: "60%" };
     }
   };
 
-  // 🔥 AI 질문 제출
+  const formatTime = (date) => {
+    const hour = date.getHours();
+    const minute = date.getMinutes();
+    const ampm = hour >= 12 ? '오후' : '오전';
+    const displayHour = hour % 12 || 12;
+    return `${ampm} ${displayHour}:${minute.toString().padStart(2, '0')}`;
+  };
+
   const handleSubmitAI = async (e) => {
     e.preventDefault();
     if (!inputText.trim() || !filters.category || !filters.location) {
@@ -102,133 +139,203 @@ function App() {
     try {
       const res = await axios.post("http://192.168.0.45:8000/ask", payload);
       const answer = res.data.answer || "답변을 받을 수 없습니다.";
-      setHistory(prev => [...prev, { user: inputText, ai: answer }]);
+      
+      const now = new Date();
+      setHistory(prev => [
+        ...prev,
+        { user: inputText, time: now },
+        { ai: answer, time: now }
+      ]);
     } catch (err) {
-      setHistory(prev => [...prev, { user: inputText, ai: "서버 연결 실패. 다시 시도해 주세요." }]);
+      const now = new Date();
+      setHistory(prev => [
+        ...prev,
+        { user: inputText, time: now },
+        { ai: "서버 연결 실패. 다시 시도해 주세요.", time: now }
+      ]);
     } finally {
       setIsLoading(false);
       setInputText("");
     }
   };
 
-  // 스크롤 자동 하단 이동
+  // 자동 스크롤 맨 아래
   useEffect(() => {
     if (chatContainerRef.current) {
       chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
     }
   }, [history, isLoading]);
 
+  const { mapHeight, listHeight } = getViewHeights();
+
   return (
     <div className="app">
       <div className="main-container">
         {/* LEFT PANEL */}
-        <div className="left-panel">
-          {/* 레스토랑 검색 + 필터 */}
-          <div className="search-section">
-            <div className="title-section">
-              <h1 className="main-title">제주시 혼자 옵서예~</h1>
-              <p className="subtitle">제주시에 있는 착한 업소를 간편히 찾아보세요.</p>
-            </div>
-
-            <form className="search-bar" onSubmit={handleSubmitAI}>
-              <div className="search-input-container">
-                <Search className="search-icon" size={20} />
-                <input
-                  type="text"
-                  placeholder="AI에게 물어볼 질문 입력"
-                  value={inputText}
-                  onChange={(e) => setInputText(e.target.value)}
-                  className="search-input"
-                />
-              </div>
-
-              <div className="filters-container">
-                <select
-                  value={filters.category}
-                  onChange={(e) => handleFilterChange("category", e.target.value)}
-                  className="filter-select"
-                >
-                  <option value="">업종</option>
-                  {categoryOptions.map(opt => (
-                    <option key={opt.value} value={opt.value}>{opt.label}</option>
-                  ))}
-                </select>
-
-                <select
-                  value={filters.location}
-                  onChange={(e) => handleFilterChange("location", e.target.value)}
-                  className="filter-select"
-                >
-                  <option value="">지역</option>
-                  {regionOptions.map(opt => (
-                    <option key={opt.value} value={opt.value}>{opt.label}</option>
-                  ))}
-                </select>
-
-                <button type="submit" className="search-button" disabled={isLoading}>
-                  {isLoading ? "전송 중..." : "질문 전송"}
-                </button>
-              </div>
-            </form>
-          </div>
-
-          {/* AI 상담 기록 */}
-          <div className="results-section">
-            <div className="list-header">
-              <h2 className="list-title">AI 상담 기록 ({history.length}개)</h2>
-            </div>
-            <div className="list-container">
-              {history.length === 0 ? (
-                <div className="empty-state">
-                  <div className="empty-icon">🤖</div>
-                  <h3 className="empty-title">아직 질문이 없습니다</h3>
-                  <p className="empty-text">질문을 입력하고 전송해보세요.</p>
+        <div className={`left-panel ${sidebarCollapsed ? 'collapsed' : ''}`}>
+          {!sidebarCollapsed && (
+            <>
+              {/* 검색 + 필터 */}
+              <div className="search-section">
+                <div className="title-section">
+                  <h1 className="main-title">제주시 혼자 옵서예~</h1>
+                  <p className="subtitle">제주시에 있는 착한 업소를 간편히 찾아보세요.</p>
                 </div>
-              ) : (
-                <div className="chat-container" ref={chatContainerRef}>
-                  {history.map((item, idx) => (
-                    <React.Fragment key={idx}>
-                      {/* AI 메시지 */}
-                      <div className="chat-message">
-                        <div className="message-header">
-                          <div className="ai-icon">AI</div>
-                          <span>맞춤형 추천 도우미</span>
-                        </div>
-                        <div className="message-content ai-message">{item.ai}</div>
-                      </div>
 
-                      {/* 사용자 메시지 */}
-                      <div className="chat-message" style={{ alignSelf: 'flex-end' }}>
-                        <div className="message-header">
-                          <div className="user-icon">나</div>
-                          <span>나</span>
-                        </div>
-                        <div className="message-content user-message">{item.user}</div>
-                      </div>
-                    </React.Fragment>
-                  ))}
+                <form className="search-bar" onSubmit={handleSubmitAI}>
+                  <div className="search-input-container">
+                    <Search className="search-icon" size={20} />
+                    <input
+                      type="text"
+                      placeholder="AI에게 물어볼 질문 입력"
+                      value={inputText}
+                      onChange={(e) => setInputText(e.target.value)}
+                      className="search-input"
+                    />
+                  </div>
 
-                  {/* 타이핑 중 표시 (옵션) */}
-                  {isLoading && (
-                    <div className="chat-message">
-                      <div className="message-header">
-                        <div className="ai-icon">AI</div>
-                        <span>맞춤형 추천 도우미</span>
-                      </div>
-                      <div className="message-content ai-message typing-effect">
-                        답변 생성 중
-                      </div>
+                  <div className="filters-container">
+                    <select
+                      value={filters.category}
+                      onChange={(e) => handleFilterChange("category", e.target.value)}
+                      className="filter-select"
+                    >
+                      <option value="">업종</option>
+                      {categoryOptions.map(opt => (
+                        <option key={opt.value} value={opt.value}>{opt.label}</option>
+                      ))}
+                    </select>
+
+                    <select
+                      value={filters.location}
+                      onChange={(e) => handleFilterChange("location", e.target.value)}
+                      className="filter-select"
+                    >
+                      <option value="">지역</option>
+                      {regionOptions.map(opt => (
+                        <option key={opt.value} value={opt.value}>{opt.label}</option>
+                      ))}
+                    </select>
+
+                    <button type="submit" className="search-button" disabled={isLoading}>
+                      {isLoading ? "전송 중..." : "질문 전송"}
+                    </button>
+                  </div>
+                </form>
+              </div>
+
+              {/* AI 상담 기록 */}
+              <div className="results-section">
+                <div className="list-header">
+                  <h2 className="list-title">AI 상담 기록 ({history.length}개)</h2>
+                  <div className="progress-bar">
+                    <div className="progress-fill"></div>
+                  </div>
+                </div>
+                <div className="list-container">
+                  {history.length === 0 ? (
+                    <div className="empty-state">
+                      <div className="empty-icon">🤖</div>
+                      <h3 className="empty-title">아직 질문이 없습니다</h3>
+                      <p className="empty-text">질문을 입력하고 전송해보세요.</p>
+                    </div>
+                  ) : (
+                    <div className="chat-container" ref={chatContainerRef}>
+                      {history.map((item, idx) => (
+                        <React.Fragment key={idx}>
+                          {/* 사용자 메시지 */}
+                          {item.user && (
+                            <>
+                              <div className="chat-message user">
+                                <div className="message-content user-message">{item.user}</div>
+                              </div>
+                              <div className="message-time user-time">{formatTime(item.time)}</div>
+                            </>
+                          )}
+
+                          {/* AI 메시지 */}
+                          {item.ai && item.ai.trim() !== "" && (
+                            <>
+                              <div className="chat-message ai">
+                                <div className="ai-avatar">
+                                  <span>🤖</span>
+                                </div>
+                                <div className="message-content ai-message">{item.ai}</div>
+                              </div>
+                              <div className="message-time ai-time">{formatTime(item.time)}</div>
+                            </>
+                          )}
+                        </React.Fragment>
+                      ))}
+
+                      {/* 타이핑 중 표시 */}
+                      {isLoading && (
+                        <>
+                          <div className="chat-message ai">
+                            <div className="ai-avatar">
+                              <span>🤖</span>
+                            </div>
+                            <div className="message-content ai-message typing-effect">
+                              답변 생성 중...
+                            </div>
+                          </div>
+                          <div className="message-time ai-time">지금</div>
+                        </>
+                      )}
                     </div>
                   )}
                 </div>
-              )}
-            </div>
+              </div>
+            </>
+          )}
+
+          {/* 사이드바 토글 버튼 */}
+          <div className="sidebar-toggle">
+            <button 
+              className="toggle-button"
+              onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+            >
+              {sidebarCollapsed ? <Maximize2 size={16} /> : <Minimize2 size={16} />}
+            </button>
           </div>
         </div>
 
         {/* RIGHT PANEL */}
         <div className="right-panel">
-          <div className="map-container">
+          {/* 뷰 컨트롤 헤더 */}
+          <div className="view-controls">
+            <div className="view-buttons">
+              <button 
+                className={`view-button ${viewMode === 'map-focused' ? 'active' : ''}`}
+                onClick={() => setViewMode('map-focused')}
+              >
+                <Map size={16} />
+                지도 중심
+              </button>
+              <button 
+                className={`view-button ${viewMode === 'balanced' ? 'active' : ''}`}
+                onClick={() => setViewMode('balanced')}
+              >
+                균등 보기
+              </button>
+              <button 
+                className={`view-button ${viewMode === 'list-focused' ? 'active' : ''}`}
+                onClick={() => setViewMode('list-focused')}
+              >
+                <List size={16} />
+                목록 중심
+              </button>
+            </div>
+            
+            {selectedRestaurant && (
+              <div className="selected-badge">
+                선택된 업소: {selectedRestaurant.name}
+              </div>
+            )}
+          </div>
+
+          {/* 지도 영역 */}
+          <div className="map-container" style={{ height: mapHeight }}>
             <div className="map-placeholder">
               <h2 className="map-title">지도</h2>
               <p className="map-subtitle">업소 위치가 여기에 표시됩니다</p>
@@ -237,6 +344,139 @@ function App() {
                   <p><strong>선택된 업소:</strong> {selectedRestaurant.name}</p>
                   <p>{selectedRestaurant.address}</p>
                 </div>
+              )}
+            </div>
+
+            {/* 지도 컨트롤 */}
+            <div className="map-controls">
+              <button className="map-control-button">+</button>
+              <button className="map-control-button">-</button>
+            </div>
+          </div>
+
+          {/* 필터 툴바 + 리스트 영역 */}
+          <div className="list-area" style={{ height: listHeight }}>
+            {/* 필터 툴바 */}
+            <div className="filter-toolbar">
+              <div className="toolbar-header">
+                <div className="filter-info">
+                  <h3 className="result-count">검색결과 {filteredRestaurants.length}개</h3>
+                  {activeFilters.length > 0 && (
+                    <button className="clear-filters" onClick={clearAllFilters}>
+                      전체해제
+                    </button>
+                  )}
+                </div>
+                
+                <div className="sort-controls">
+                  <Filter size={16} />
+                  <select 
+                    className="sort-select" 
+                    value={sortBy} 
+                    onChange={(e) => setSortBy(e.target.value)}
+                  >
+                    <option value="distance">가까운순</option>
+                    <option value="rating">평점순</option>
+                    <option value="price">가격순</option>
+                    <option value="popular">인기순</option>
+                  </select>
+                </div>
+              </div>
+              
+              <div className="quick-filters">
+                {quickFilters.map(filter => (
+                  <button 
+                    key={filter.id}
+                    className={`filter-chip ${activeFilters.includes(filter.id) ? 'active' : ''}`}
+                    onClick={() => toggleQuickFilter(filter.id)}
+                    style={{ 
+                      '--filter-color': filter.color,
+                      backgroundColor: activeFilters.includes(filter.id) ? filter.color : 'transparent',
+                      color: activeFilters.includes(filter.id) ? 'white' : filter.color,
+                      borderColor: filter.color
+                    }}
+                  >
+                    {filter.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* 리스트 컨테이너 */}
+            <div className="restaurant-list">
+              {filteredRestaurants.length === 0 ? (
+                <div className="empty-state">
+                  <div className="empty-icon">🍽️</div>
+                  <h3 className="empty-title">검색 결과가 없습니다</h3>
+                  <p className="empty-text">다른 조건으로 검색해보세요.</p>
+                </div>
+              ) : (
+                filteredRestaurants.map((restaurant, idx) => (
+                  <div 
+                    key={idx} 
+                    className={`restaurant-card modern ${selectedRestaurant === restaurant ? 'selected' : ''}`}
+                    onClick={() => handleRestaurantSelect(restaurant)}
+                  >
+                    <div className="card-image">
+                      <img src={restaurant.image || '/placeholder-food.jpg'} alt={restaurant.name} className="restaurant-image" />
+                      <div className="status-badges">
+                        <span className="distance-badge">{restaurant.distance || '1.2km'}</span>
+                        {restaurant.isOpen === false && (
+                          <span className="closed-badge">마감</span>
+                        )}
+                      </div>
+                    </div>
+                    
+                    <div className="card-content">
+                      <div className="card-header">
+                        <h3 className="restaurant-name">{restaurant.name}</h3>
+                        <span className="price-range">{restaurant.priceRange || '$$'}</span>
+                      </div>
+                      
+                      <p className="restaurant-description">{restaurant.description}</p>
+                      
+                      <div className="rating-info">
+                        <div className="rating">
+                          <Star className="star-icon" size={14} fill="#fbbf24" />
+                          <span className="rating-text">{restaurant.rating || '4.5'}</span>
+                        </div>
+                        {restaurant.reviewCount && (
+                          <span className="review-count">({restaurant.reviewCount}개 리뷰)</span>
+                        )}
+                        <div className="status-indicator">
+                          {restaurant.isOpen !== false && (
+                            <span className="open-badge">영업중</span>
+                          )}
+                        </div>
+                      </div>
+                      
+                      <div className="location-info">
+                        <MapPin size={12} />
+                        <span className="location-text">{restaurant.location}</span>
+                        {restaurant.category && (
+                          <>
+                            <span className="separator">•</span>
+                            <span className="category-text">{restaurant.category}</span>
+                          </>
+                        )}
+                      </div>
+                      
+                      <div className="card-footer">
+                        <span className="price-info">{restaurant.price || '가격 문의'}</span>
+                        <div className="action-buttons">
+                          <button className="action-button">
+                            <Navigation size={12} />
+                            길찾기
+                          </button>
+                          <button className="action-button">
+                            <Phone size={12} />
+                            전화
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))
               )}
             </div>
           </div>
