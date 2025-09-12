@@ -14,6 +14,7 @@ import {
   Clock,
 } from "lucide-react";
 import axios from "axios";
+import MapView from "./components/MapView";
 
 const sampleRestaurants = [];
 
@@ -201,7 +202,7 @@ function App() {
 
       const rows = res.data.rows;
       setViewData(rows);
-      console.log("rows", rows);
+      // console.log("rows", rows);
 
       // DB에서 가져온 업소 리스트 업데이트
       setRestaurants(restaurantData);
@@ -309,8 +310,8 @@ function App() {
       listArea.style.height = listHeight;
     }
   };
-  console.log("history", history);
-  console.log("viewData", viewData);
+  // console.log("history", history);
+  // console.log("viewData", viewData);
   return (
     <div className="app">
       <div className="main-container">
@@ -515,8 +516,12 @@ function App() {
 
           {/* 지도 영역 */}
           <div className="map-container" style={{ height: tempMapHeight }}>
-            <div className="map-placeholder">
+            <div
+              className="map-placeholder"
+              style={{ height: "600px", width: "600px" }}
+            >
               <h2 className="map-title">지도</h2>
+              <MapView viewData={viewData} />
               <p className="map-subtitle">업소 위치가 여기에 표시됩니다</p>
               {selectedRestaurant && (
                 <div className="selected-info">
