@@ -1193,3 +1193,8 @@ body {
   height: 100% !important; /* ✅ 반드시 100%로 강제 설정 */
   width: 100% !important;
 }
+
+/* App.css */
+.map-controls {
+  display: none !important; /* 강제로 숨김 */
+}
