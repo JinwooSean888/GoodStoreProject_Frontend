@@ -34,11 +34,14 @@ function App() {
 
   // 새로운 UI 상태들
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
-  const [viewMode, setViewMode] = useState("balanced"); // "map-focused", "balanced", "list-focused"
+  const [viewMode, setViewMode] = useState("balanced");
   const [activeFilters, setActiveFilters] = useState([]);
   const [sortBy, setSortBy] = useState("distance");
   const [viewData, setViewData] = useState([]);
   const chatContainerRef = useRef(null);
+
+  // ✅ 지도 이동용 상태 — 유지
+  const [selectedLocation, setSelectedLocation] = useState(null);
 
   const categoryOptions = [
     { value: "11", label: "한식" },
@@ -90,7 +93,6 @@ function App() {
     { value: "125", label: "한경면" },
   ];
 
-  // 퀵 필터 옵션들
   const quickFilters = [
     { id: "open", label: "영업중", color: "#10b981" },
     { id: "nearby", label: "가까운곳", color: "#3b82f6" },
@@ -98,7 +100,6 @@ function App() {
     { id: "rating", label: "평점높은", color: "#8b5cf6" },
   ];
 
-  // 레스토랑 필터 적용
   useEffect(() => {
     let filtered = restaurants;
 
@@ -131,10 +132,12 @@ function App() {
     setFilters({ ...filters, [field]: value });
   };
 
-  const handleRestaurantSelect = (restaurant) =>
+  // ✅ 수정: 리스트 클릭 시 지도 이동
+  const handleRestaurantSelect = (restaurant) => {
     setSelectedRestaurant(restaurant);
+    setSelectedLocation([restaurant.laCrdnt, restaurant.loCrdnt]); // ✅ 좌표 전달
+  };
 
-  // 퀵 필터 토글
   const toggleQuickFilter = (filterId) => {
     setActiveFilters((prev) =>
       prev.includes(filterId)
@@ -143,12 +146,10 @@ function App() {
     );
   };
 
-  // 전체 필터 해제
   const clearAllFilters = () => {
     setActiveFilters([]);
   };
 
-  // 뷰 모드에 따른 높이 계산
   const getViewHeights = () => {
     switch (viewMode) {
       case "map-focused":
@@ -168,7 +169,6 @@ function App() {
     return `${ampm} ${displayHour}:${minute.toString().padStart(2, "0")}`;
   };
 
-  // AI + DB 연결
   const handleSubmitAI = async (e) => {
     e.preventDefault();
     if (!inputText.trim() || !filters.category || !filters.location) {
@@ -184,8 +184,6 @@ function App() {
       },
     };
 
-    console.log("Sending to server:", payload);
-
     setIsLoading(true);
     try {
       const res = await axios.post("http://192.168.0.45:8000/ask", payload, {
@@ -194,16 +192,11 @@ function App() {
         },
       });
 
-      // 서버에서 데이터 가져오기
-      console.log("Server Response:", res.data);
-
       const answer = res.data.answer || "답변을 받을 수 없습니다.";
       const restaurantData = res.data.restaurants || [];
-
       const rows = res.data.rows;
-      setViewData(rows);
 
-      // DB에서 가져온 업소 리스트 업데이트
+      setViewData(rows);
       setRestaurants(restaurantData);
 
       const now = new Date();
@@ -234,7 +227,6 @@ function App() {
     }
   }, [history, isLoading]);
 
-  // ✅ 리사이저 상태 추가
   const [isResizing, setIsResizing] = useState(false);
   const [tempMapHeight, setTempMapHeight] = useState(
     getViewHeights().mapHeight
@@ -243,7 +235,6 @@ function App() {
     getViewHeights().listHeight
   );
 
-  // ✅ 리사이저 이벤트 핸들러 (즉시 반응)
   useEffect(() => {
     const handleMouseMove = (e) => {
       if (!isResizing) return;
@@ -253,13 +244,11 @@ function App() {
 
       const rect = container.getBoundingClientRect();
       const y = e.clientY - rect.top;
-      const totalHeight = rect.height - 120; // 헤더 제외
+      const totalHeight = rect.height - 120;
 
-      // ✅ 즉시 계산 및 적용
       const newMapHeight = Math.max(100, Math.min(totalHeight - 100, y));
       const newListHeight = totalHeight - newMapHeight;
 
-      // ✅ 직접 DOM 조작으로 즉시 반영
       const mapContainer = document.querySelector(".map-container");
       const listArea = document.querySelector(".list-area");
 
@@ -271,8 +260,6 @@ function App() {
 
     const handleMouseUp = () => {
       setIsResizing(false);
-
-      // ✅ 마우스 뗐을 때 상태 업데이트
       const mapContainer = document.querySelector(".map-container");
       const listArea = document.querySelector(".list-area");
 
@@ -293,14 +280,12 @@ function App() {
     };
   }, [isResizing]);
 
-  // ✅ viewMode 변경 시 리사이저 상태 초기화
   const handleViewChange = (mode) => {
     setViewMode(mode);
     const { mapHeight, listHeight } = getViewHeights();
     setTempMapHeight(mapHeight);
     setTempListHeight(listHeight);
 
-    // ✅ DOM 직접 조작으로 즉시 반영
     const mapContainer = document.querySelector(".map-container");
     const listArea = document.querySelector(".list-area");
 
@@ -317,7 +302,6 @@ function App() {
         <div className={`left-panel ${sidebarCollapsed ? "collapsed" : ""}`}>
           {!sidebarCollapsed && (
             <>
-              {/* 검색 + 필터 */}
               <div className="search-section">
                 <div className="title-section">
                   <h1 className="main-title">제주시 혼자 옵서예~</h1>
@@ -380,7 +364,6 @@ function App() {
                 </form>
               </div>
 
-              {/* AI 상담 기록 */}
               <div className="results-section">
                 <div className="list-header">
                   <h2 className="list-title">
@@ -403,7 +386,6 @@ function App() {
                     <div className="chat-container" ref={chatContainerRef}>
                       {history.map((item, idx) => (
                         <React.Fragment key={idx}>
-                          {/* 사용자 메시지 */}
                           {item.user && (
                             <>
                               <div className="chat-message user">
@@ -417,7 +399,6 @@ function App() {
                             </>
                           )}
 
-                          {/* AI 메시지 */}
                           {item.ai && item.ai.trim() !== "" && (
                             <>
                               <div className="chat-message ai">
@@ -436,7 +417,6 @@ function App() {
                         </React.Fragment>
                       ))}
 
-                      {/* 타이핑 중 표시 */}
                       {isLoading && (
                         <>
                           <div className="chat-message ai">
@@ -457,7 +437,6 @@ function App() {
             </>
           )}
 
-          {/* 사이드바 토글 버튼 */}
           <div className="sidebar-toggle">
             <button
               className="toggle-button"
@@ -474,7 +453,6 @@ function App() {
 
         {/* RIGHT PANEL */}
         <div className="right-panel">
-          {/* 뷰 컨트롤 헤더 */}
           <div className="view-controls">
             <div className="view-buttons">
               <button
@@ -507,12 +485,12 @@ function App() {
 
             {selectedRestaurant && (
               <div className="selected-badge">
-                선택된 업소: {selectedRestaurant.name}
+                선택된 업소: {selectedRestaurant.bsshNm}
               </div>
             )}
           </div>
 
-          {/* ✅ 수정된 지도 영역 — 꽉 채움 */}
+          {/* 지도 영역 */}
           <div
             className="map-container"
             style={{
@@ -549,8 +527,11 @@ function App() {
                 지도
               </h2>
 
-              {/* 🗺️ 여기가 핵심 — MapView는 100% 확장됨 */}
-              <MapView viewData={viewData} />
+              {/* 🗺️ 핵심: selectedLocation 전달 */}
+              <MapView
+                viewData={viewData}
+                selectedLocation={selectedLocation} // ✅ 좌표 전달
+              />
 
               <p
                 className="map-subtitle"
@@ -582,32 +563,14 @@ function App() {
                   }}
                 >
                   <p>
-                    <strong>선택된 업소:</strong> {selectedRestaurant.name}
+                    <strong>선택된 업소:</strong> {selectedRestaurant.bsshNm}
                   </p>
-                  <p>{selectedRestaurant.address}</p>
+                  <p>{selectedRestaurant.rnAdres}</p>
                 </div>
               )}
             </div>
-
-            {/* 지도 컨트롤 */}
-            <div
-              className="map-controls"
-              style={{
-                position: "absolute",
-                top: "10px",
-                right: "10px",
-                display: "flex",
-                flexDirection: "column",
-                gap: "5px",
-                zIndex: 50,
-              }}
-            >
-              <button className="map-control-button">+</button>
-              <button className="map-control-button">-</button>
-            </div>
           </div>
 
-          {/* ✅ 리사이저 추가 */}
           <div
             className="resizer"
             onMouseDown={(e) => {
@@ -679,14 +642,25 @@ function App() {
               ) : (
                 <>
                   {viewData.map((data, idx) => (
-                    <div key={data.id} className="p-4 border rounded-lg mb-2">
+                    <div
+                      key={data.id}
+                      className="p-4 border rounded-lg mb-2 cursor-pointer hover:bg-blue-50 transition-colors"
+                      onClick={() => handleRestaurantSelect(data)} // ✅ 클릭 시 지도 이동!
+                      style={{
+                        borderLeft:
+                          selectedRestaurant?.id === data.id
+                            ? "4px solid #3b82f6"
+                            : "4px solid transparent",
+                        backgroundColor:
+                          selectedRestaurant?.id === data.id
+                            ? "#f0f9ff"
+                            : "white",
+                      }}
+                    >
                       <h3 className="font-bold text-lg">{data.bsshNm}</h3>
                       <p className="text-gray-600">
                         {data.rnAdres} {data.bsshTelno}
                       </p>
-                      <span className="text-sm text-gray-400">
-                        {/* Index: {idx} */}
-                      </span>
                     </div>
                   ))}
                 </>
