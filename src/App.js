@@ -202,7 +202,6 @@ function App() {
 
       const rows = res.data.rows;
       setViewData(rows);
-      // console.log("rows", rows);
 
       // DB에서 가져온 업소 리스트 업데이트
       setRestaurants(restaurantData);
@@ -310,8 +309,7 @@ function App() {
       listArea.style.height = listHeight;
     }
   };
-  // console.log("history", history);
-  // console.log("viewData", viewData);
+
   return (
     <div className="app">
       <div className="main-container">
@@ -514,17 +512,75 @@ function App() {
             )}
           </div>
 
-          {/* 지도 영역 */}
-          <div className="map-container" style={{ height: tempMapHeight }}>
+          {/* ✅ 수정된 지도 영역 — 꽉 채움 */}
+          <div
+            className="map-container"
+            style={{
+              height: tempMapHeight,
+              width: "100%",
+              position: "relative",
+              overflow: "hidden",
+              borderRadius: "12px",
+            }}
+          >
             <div
-              className="map-placeholder"
-              style={{ height: "600px", width: "600px" }}
+              style={{
+                height: "100%",
+                width: "100%",
+                position: "relative",
+                borderRadius: "12px",
+                overflow: "hidden",
+                border: "2px solid #8a2be2",
+              }}
             >
-              <h2 className="map-title">지도</h2>
+              <h2
+                className="map-title"
+                style={{
+                  position: "absolute",
+                  top: "10px",
+                  left: "10px",
+                  zIndex: 10,
+                  margin: 0,
+                  padding: 0,
+                  color: "#fff",
+                  textShadow: "1px 1px 2px rgba(0,0,0,0.8)",
+                }}
+              >
+                지도
+              </h2>
+
+              {/* 🗺️ 여기가 핵심 — MapView는 100% 확장됨 */}
               <MapView viewData={viewData} />
-              <p className="map-subtitle">업소 위치가 여기에 표시됩니다</p>
+
+              <p
+                className="map-subtitle"
+                style={{
+                  position: "absolute",
+                  bottom: "10px",
+                  left: "10px",
+                  zIndex: 10,
+                  color: "#fff",
+                  margin: 0,
+                  textShadow: "1px 1px 2px rgba(0,0,0,0.8)",
+                }}
+              >
+                업소 위치가 여기에 표시됩니다
+              </p>
+
               {selectedRestaurant && (
-                <div className="selected-info">
+                <div
+                  className="selected-info"
+                  style={{
+                    position: "absolute",
+                    bottom: "50px",
+                    left: "10px",
+                    backgroundColor: "rgba(0,0,0,0.6)",
+                    color: "#fff",
+                    padding: "8px 12px",
+                    borderRadius: "8px",
+                    zIndex: 20,
+                  }}
+                >
                   <p>
                     <strong>선택된 업소:</strong> {selectedRestaurant.name}
                   </p>
@@ -534,7 +590,18 @@ function App() {
             </div>
 
             {/* 지도 컨트롤 */}
-            <div className="map-controls">
+            <div
+              className="map-controls"
+              style={{
+                position: "absolute",
+                top: "10px",
+                right: "10px",
+                display: "flex",
+                flexDirection: "column",
+                gap: "5px",
+                zIndex: 50,
+              }}
+            >
               <button className="map-control-button">+</button>
               <button className="map-control-button">-</button>
             </div>
