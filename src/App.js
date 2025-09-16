@@ -533,21 +533,7 @@ function App() {
                 selectedLocation={selectedLocation} // ✅ 좌표 전달
               />
 
-              <p
-                className="map-subtitle"
-                style={{
-                  position: "absolute",
-                  bottom: "10px",
-                  left: "10px",
-                  zIndex: 10,
-                  color: "#fff",
-                  margin: 0,
-                  textShadow: "1px 1px 2px rgba(0,0,0,0.8)",
-                }}
-              >
-                업소 위치가 여기에 표시됩니다
-              </p>
-
+  
               {selectedRestaurant && (
                 <div
                   className="selected-info"
